@@ -399,3 +399,12 @@ $("registerForm").addEventListener(
     const phone =
       normalizePhone(
         $("registerPhone").value
+import {
+  getFirestore,
+  collection,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+
+const db = getFirestore(app);
+
+console.log("Firestore connected!");
