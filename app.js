@@ -40,7 +40,6 @@ get(busesRef)
 const auth = firebase.auth();
 
 
-
 // ======================================================
 // DEMO BUS NUMBERS AND ROUTES
 // Change these later to your actual AMS bus routes.
