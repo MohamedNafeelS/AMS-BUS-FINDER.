@@ -83,6 +83,15 @@ footer{text-align:center;color:#8492a6;padding:30px 10px;font-size:12px}
  <div class="dashboard-head"><div><p class="eyebrow">DRIVER CONTROL</p><h2 style="margin:0">Location Sharing</h2></div><div class="row" style="justify-content:flex-end"><button class="secondary" onclick="openShareMenu()">↗ Share</button><button class="logout" onclick="driverLogout()">Log out</button></div></div>
  <div class="card">
   <div class="field"><label>Which bus are you driving?</label><select id="driverBus"></select></div>
+  <button id="startTrackingBtn">
+  Start GPS Tracking
+</button>
+
+<button id="stopTrackingBtn">
+  Stop GPS Tracking
+</button>
+
+<div id="driverMessage" class="message"></div>
   <div class="big-toggle"><div><strong>Share my live location</strong><br><small class="muted">Turn this ON only when the bus is running.</small></div><button id="shareToggle" class="toggle" onclick="toggleShare()" aria-label="Share location"><i></i></button></div>
   <div id="driverStatus" class="status off">Location sharing is OFF.</div>
   <div class="info-grid"><div class="stat"><small>Driver</small><strong id="driverName">—</strong></div><div class="stat"><small>Bus</small><strong id="driverBusShow">—</strong></div><div class="stat"><small>Last update</small><strong id="lastUpdate">—</strong></div></div>
