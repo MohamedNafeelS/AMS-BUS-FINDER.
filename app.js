@@ -8,13 +8,13 @@
 */
 
 const FIREBASE_CONFIG = {
-  apiKey: "PASTE_YOUR_API_KEY",
-  authDomain: "PASTE_YOUR_PROJECT.firebaseapp.com",
-  databaseURL: "https://PASTE_YOUR_PROJECT-default-rtdb.firebaseio.com",
-  projectId: "PASTE_YOUR_PROJECT",
-  storageBucket: "PASTE_YOUR_PROJECT.firebasestorage.app",
-  messagingSenderId: "PASTE_YOUR_MESSAGING_SENDER_ID",
-  appId: "PASTE_YOUR_APP_ID"
+ apiKey: "AIzaSyDfMoUFnEcvuAXP9TGTjeXLgKUCtqTlWJY",
+ authDomain: "ams-busfind.firebaseapp.com",
+ projectId: "ams-busfind",
+ storageBucket: "ams-busfind.firebasestorage.app",
+ messagingSenderId: "512389746015",
+ appId: "1:512389746015:web:9b1728740816b0dad6baea",
+ measurementId: "G-93S728E8YB"
 };
 
 firebase.initializeApp(FIREBASE_CONFIG);
