@@ -1196,19 +1196,3 @@ fillBusSelects();
 console.log(
   "AMS Bus Finder Firebase initialized successfully."
 );
-// GPS TRACKING BUTTONS
-
-const startTrackingBtn = $("startTrackingBtn");
-const stopTrackingBtn = $("stopTrackingBtn");
-
-if (startTrackingBtn) {
-  startTrackingBtn.addEventListener("click", () => {
-    startDriverTracking();
-  });
-}
-
-if (stopTrackingBtn) {
-  stopTrackingBtn.addEventListener("click", () => {
-    stopDriverTracking();
-  });
-}
