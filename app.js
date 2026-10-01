@@ -6,12 +6,13 @@
   After creating your Firebase project, replace the values
   inside FIREBASE_CONFIG with your Firebase Web App configuration.
 */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
+
 import {
   getDatabase,
   ref,
   get
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
-
 const FIREBASE_CONFIG = {
  apiKey: "AIzaSyDfMoUFnEcvuAXP9TGTjeXLgKUCtqTlWJY",
  authDomain: "ams-busfind.firebaseapp.com",
@@ -21,8 +22,7 @@ const FIREBASE_CONFIG = {
  appId: "1:512389746015:web:9b1728740816b0dad6baea",
  measurementId: "G-93S728E8YB"
 };
-
-const app = firebase.initializeApp(FIREBASE_CONFIG);
+const app = initializeApp(FIREBASE_CONFIG);
 const db = getDatabase(app);
 const busesRef = ref(db, "buses");
 get(busesRef)
