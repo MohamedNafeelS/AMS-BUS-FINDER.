@@ -1,63 +1,106 @@
 /*
   AMS BUS FINDER
-  Real Firebase Realtime Database + browser GPS implementation.
+  Firebase Realtime Database + Firebase Authentication + Browser GPS
 
-  IMPORTANT:
-  After creating your Firebase project, replace the values
-  inside FIREBASE_CONFIG with your Firebase Web App configuration.
+  Firebase SDK v12 - Modular Syntax
 */
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
 
 import {
   getDatabase,
   ref,
-  get
+  get,
+  set,
+  onValue
 } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-auth.js";
+
+
+// ======================================================
+// FIREBASE CONFIGURATION
+// ======================================================
+
 const FIREBASE_CONFIG = {
- apiKey: "AIzaSyDfMoUFnEcvuAXP9TGTjeXLgKUCtqTlWJY",
- authDomain: "ams-busfind.firebaseapp.com",
- projectId: "ams-busfind",
- storageBucket: "ams-busfind.firebasestorage.app",
- messagingSenderId: "512389746015",
- appId: "1:512389746015:web:9b1728740816b0dad6baea",
- measurementId: "G-93S728E8YB"
+  apiKey: "AIzaSyDfMoUFnEcvuAXP9TGTjeXLgKUCtqTlWJY",
+  authDomain: "ams-busfind.firebaseapp.com",
+  projectId: "ams-busfind",
+  storageBucket: "ams-busfind.firebasestorage.app",
+  messagingSenderId: "512389746015",
+  appId: "1:512389746015:web:9b1728740816b0dad6baea",
+  measurementId: "G-93S728E8YB"
 };
+
+
+// ======================================================
+// INITIALIZE FIREBASE
+// ======================================================
+
 const app = initializeApp(FIREBASE_CONFIG);
+
 const db = getDatabase(app);
+
+const auth = getAuth(app);
+
+
+// ======================================================
+// TEST FIREBASE DATABASE
+// ======================================================
+
 const busesRef = ref(db, "buses");
+
 get(busesRef)
   .then((snapshot) => {
+
     if (snapshot.exists()) {
+
       console.log("BUS DATA:", snapshot.val());
+
     } else {
-      console.log("No bus data found");
+
+      console.log("No bus data found.");
+
     }
+
   })
   .catch((error) => {
-    console.error("Firebase Database Error:", error);
-  });
 
-const auth = firebase.auth();
+    console.error(
+      "Firebase Database Error:",
+      error
+    );
+
+  });
 
 
 // ======================================================
 // DEMO BUS NUMBERS AND ROUTES
-// Change these later to your actual AMS bus routes.
 // ======================================================
 
 const BUS_OPTIONS = [
+
   {
     number: "AMS-01",
     route: "Avadi → Paruthipattu → College"
   },
+
   {
     number: "AMS-02",
     route: "Ambattur → Padi → College"
   },
+
   {
     number: "AMS-03",
     route: "Thirumullaivoyal → Avadi → College"
   }
+
 ];
 
 
@@ -66,14 +109,17 @@ const BUS_OPTIONS = [
 // ======================================================
 
 let currentDriver = null;
+
 let currentDriverProfile = null;
 
 let watchId = null;
+
 let currentTrackingBus = null;
 
 let studentListener = null;
 
 let map = null;
+
 let busMarker = null;
 
 
@@ -81,7 +127,7 @@ let busMarker = null;
 // SHORTCUT
 // ======================================================
 
-const $ = id => document.getElementById(id);
+const $ = (id) => document.getElementById(id);
 
 
 // ======================================================
@@ -90,22 +136,43 @@ const $ = id => document.getElementById(id);
 
 function showPage(id) {
 
-  document.querySelectorAll(".page").forEach(page => {
+  document.querySelectorAll(".page").forEach((page) => {
+
     page.classList.remove("active");
+
   });
 
-  $(id).classList.add("active");
+
+  const page = $(id);
+
+  if (!page) {
+    console.error(`Page not found: ${id}`);
+    return;
+  }
+
+
+  page.classList.add("active");
+
 
   window.scrollTo({
+
     top: 0,
+
     behavior: "smooth"
+
   });
 
+
   if (id === "studentPage" && map) {
+
     setTimeout(() => {
+
       map.invalidateSize();
+
     }, 100);
+
   }
+
 }
 
 
@@ -115,7 +182,7 @@ function showPage(id) {
 
 function fillBusSelects() {
 
-  const html = BUS_OPTIONS.map(bus => {
+  const html = BUS_OPTIONS.map((bus) => {
 
     return `
       <option value="${bus.number}">
@@ -125,11 +192,34 @@ function fillBusSelects() {
 
   }).join("");
 
-  $("registerBus").innerHTML = html;
 
-  $("studentBus").innerHTML = html;
+  const registerBus = $("registerBus");
 
-  $("driverBusSelect").innerHTML = html;
+  const studentBus = $("studentBus");
+
+  const driverBusSelect = $("driverBusSelect");
+
+
+  if (registerBus) {
+
+    registerBus.innerHTML = html;
+
+  }
+
+
+  if (studentBus) {
+
+    studentBus.innerHTML = html;
+
+  }
+
+
+  if (driverBusSelect) {
+
+    driverBusSelect.innerHTML = html;
+
+  }
+
 }
 
 
@@ -141,10 +231,24 @@ function setMessage(id, text, type = "") {
 
   const element = $(id);
 
+  if (!element) {
+
+    console.warn(
+      `Message element not found: ${id}`
+    );
+
+    return;
+
+  }
+
+
   element.textContent = text;
 
+
   element.className =
-    "message" + (type ? ` ${type}` : "");
+    "message" +
+    (type ? ` ${type}` : "");
+
 }
 
 
@@ -155,16 +259,26 @@ function setMessage(id, text, type = "") {
 function formatTime(timestamp) {
 
   if (!timestamp) {
+
     return "—";
+
   }
 
+
   return new Date(timestamp).toLocaleString(
+
     "en-IN",
+
     {
+
       dateStyle: "medium",
+
       timeStyle: "medium"
+
     }
+
   );
+
 }
 
 
@@ -174,16 +288,20 @@ function formatTime(timestamp) {
 
 function normalizePhone(phone) {
 
-  return phone.replace(/\D/g, "");
+  return String(phone || "")
+    .replace(/\D/g, "");
+
 }
 
 
-// Firebase requires an email.
-// We convert the driver's phone number internally.
+// ======================================================
+// CONVERT PHONE TO INTERNAL FIREBASE EMAIL
+// ======================================================
 
 function authEmailFromPhone(phone) {
 
   return `${normalizePhone(phone)}@amsbusfinder.app`;
+
 }
 
 
@@ -195,9 +313,15 @@ function setConnectionBadge(connected) {
 
   const element = $("connectionBadge");
 
+  if (!element) {
+    return;
+  }
+
+
   if (connected) {
 
-    element.textContent = "Firebase connected";
+    element.textContent =
+      "Firebase connected";
 
     element.className =
       "status-badge connected";
@@ -209,19 +333,43 @@ function setConnectionBadge(connected) {
 
     element.className =
       "status-badge disconnected";
+
   }
+
 }
 
 
-db.ref(".info/connected").on(
-  "value",
-  snapshot => {
+// ======================================================
+// REALTIME DATABASE CONNECTION LISTENER
+// ======================================================
+
+const connectionRef =
+  ref(db, ".info/connected");
+
+
+onValue(
+
+  connectionRef,
+
+  (snapshot) => {
 
     setConnectionBadge(
       snapshot.val() === true
     );
 
+  },
+
+  (error) => {
+
+    console.error(
+      "Connection status error:",
+      error
+    );
+
+    setConnectionBadge(false);
+
   }
+
 );
 
 
@@ -233,32 +381,66 @@ function setDriverDashboard(profile) {
 
   currentDriverProfile = profile;
 
-  $("driverName").textContent =
-    profile.name || "Driver";
 
-  $("driverBus").textContent =
-    profile.assignedBus || "—";
+  const driverName =
+    $("driverName");
 
-  $("driverWelcome").textContent =
-    `Logged in as ${profile.name || "Driver"}`;
+  const driverBus =
+    $("driverBus");
 
+  const driverWelcome =
+    $("driverWelcome");
 
-  const optionExists =
-    [...$("driverBusSelect").options]
-      .some(option =>
-        option.value === profile.assignedBus
-      );
+  const driverBusSelect =
+    $("driverBusSelect");
 
 
-  if (optionExists) {
+  if (driverName) {
 
-    $("driverBusSelect").value =
-      profile.assignedBus;
+    driverName.textContent =
+      profile.name || "Driver";
+
+  }
+
+
+  if (driverBus) {
+
+    driverBus.textContent =
+      profile.assignedBus || "—";
+
+  }
+
+
+  if (driverWelcome) {
+
+    driverWelcome.textContent =
+      `Logged in as ${profile.name || "Driver"}`;
+
+  }
+
+
+  if (driverBusSelect) {
+
+    const optionExists =
+      [...driverBusSelect.options]
+        .some(
+          (option) =>
+            option.value === profile.assignedBus
+        );
+
+
+    if (optionExists) {
+
+      driverBusSelect.value =
+        profile.assignedBus;
+
+    }
 
   }
 
 
   showPage("driverPage");
+
 }
 
 
@@ -268,27 +450,32 @@ function setDriverDashboard(profile) {
 
 async function loadDriverProfile(user) {
 
+  const driverRef =
+    ref(db, `drivers/${user.uid}`);
+
+
   const snapshot =
-    await db.ref(
-      `drivers/${user.uid}`
-    ).once("value");
+    await get(driverRef);
 
 
   if (!snapshot.exists()) {
 
-    await auth.signOut();
+    await signOut(auth);
 
     throw new Error(
       "Driver profile was not found."
     );
+
   }
 
 
   currentDriver = user;
 
+
   setDriverDashboard(
     snapshot.val()
   );
+
 }
 
 
@@ -296,132 +483,474 @@ async function loadDriverProfile(user) {
 // LOGIN / REGISTER TABS
 // ======================================================
 
-$("loginTab").addEventListener(
-  "click",
-  () => {
+const loginTab =
+  $("loginTab");
 
-    $("loginTab").classList.add("active");
+const registerTab =
+  $("registerTab");
 
-    $("registerTab")
-      .classList.remove("active");
+const loginForm =
+  $("loginForm");
 
-
-    $("loginForm")
-      .classList.remove("hidden");
-
-    $("registerForm")
-      .classList.add("hidden");
+const registerForm =
+  $("registerForm");
 
 
-    setMessage(
-      "authMessage",
-      ""
-    );
+if (loginTab) {
 
-  }
-);
+  loginTab.addEventListener(
+    "click",
+    () => {
 
+      loginTab.classList.add("active");
 
-$("registerTab").addEventListener(
-  "click",
-  () => {
+      if (registerTab) {
 
-    $("registerTab")
-      .classList.add("active");
+        registerTab.classList.remove("active");
 
-    $("loginTab")
-      .classList.remove("active");
+      }
 
 
-    $("registerForm")
-      .classList.remove("hidden");
+      if (loginForm) {
 
-    $("loginForm")
-      .classList.add("hidden");
+        loginForm.classList.remove("hidden");
+
+      }
 
 
-    setMessage(
-      "authMessage",
-      ""
-    );
+      if (registerForm) {
 
-  }
-);
+        registerForm.classList.add("hidden");
+
+      }
+
+
+      setMessage(
+        "authMessage",
+        ""
+      );
+
+    }
+  );
+
+}
+
+
+if (registerTab) {
+
+  registerTab.addEventListener(
+    "click",
+    () => {
+
+      registerTab.classList.add("active");
+
+      if (loginTab) {
+
+        loginTab.classList.remove("active");
+
+      }
+
+
+      if (registerForm) {
+
+        registerForm.classList.remove("hidden");
+
+      }
+
+
+      if (loginForm) {
+
+        loginForm.classList.add("hidden");
+
+      }
+
+
+      setMessage(
+        "authMessage",
+        ""
+      );
+
+    }
+  );
+
+}
 
 
 // ======================================================
 // DRIVER LOGIN
 // ======================================================
 
-$("loginForm").addEventListener(
-  "submit",
-  async event => {
+if (loginForm) {
 
-    event.preventDefault();
+  loginForm.addEventListener(
+    "submit",
+    async (event) => {
 
-    setMessage(
-      "authMessage",
-      "Logging in…"
-    );
+      event.preventDefault();
 
-
-    try {
-
-      await auth.signInWithEmailAndPassword(
-
-        authEmailFromPhone(
-          $("loginPhone").value
-        ),
-
-        $("loginPassword").value
-
-      );
 
       setMessage(
         "authMessage",
-        "Login successful.",
-        "success"
+        "Logging in…"
       );
 
 
-    } catch (error) {
+      const phone =
+        $("loginPhone")?.value || "";
 
-      setMessage(
-        "authMessage",
-        friendlyAuthError(error),
-        "error"
-      );
+
+      const password =
+        $("loginPassword")?.value || "";
+
+
+      if (!phone || !password) {
+
+        setMessage(
+          "authMessage",
+          "Please enter your phone number and password.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      try {
+
+        const email =
+          authEmailFromPhone(phone);
+
+
+        await signInWithEmailAndPassword(
+
+          auth,
+
+          email,
+
+          password
+
+        );
+
+
+        setMessage(
+          "authMessage",
+          "Login successful.",
+          "success"
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "Login error:",
+          error
+        );
+
+
+        setMessage(
+          "authMessage",
+          friendlyAuthError(error),
+          "error"
+        );
+
+      }
 
     }
+  );
 
-  }
-);
+}
 
 
 // ======================================================
 // DRIVER REGISTRATION
 // ======================================================
 
-$("registerForm").addEventListener(
-  "submit",
-  async event => {
+if (registerForm) {
 
-    event.preventDefault();
+  registerForm.addEventListener(
+    "submit",
+    async (event) => {
 
-
-    const name =
-      $("registerName").value.trim();
+      event.preventDefault();
 
 
-    const phone =
-      normalizePhone(
-        $("registerPhone").value)
-import {
-  getFirestore,
-  collection,
-  getDocs
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-firestore.js";
+      const name =
+        $("registerName")?.value.trim() || "";
 
-const db = getFirestore(app);
 
-console.log("Firestore connected!");
+      const phone =
+        normalizePhone(
+          $("registerPhone")?.value || ""
+        );
+
+
+      const password =
+        $("registerPassword")?.value || "";
+
+
+      const assignedBus =
+        $("registerBus")?.value || "";
+
+
+      if (!name) {
+
+        setMessage(
+          "authMessage",
+          "Please enter the driver's name.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      if (!phone) {
+
+        setMessage(
+          "authMessage",
+          "Please enter a valid phone number.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      if (password.length < 6) {
+
+        setMessage(
+          "authMessage",
+          "Password must contain at least 6 characters.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      if (!assignedBus) {
+
+        setMessage(
+          "authMessage",
+          "Please select a bus.",
+          "error"
+        );
+
+        return;
+
+      }
+
+
+      setMessage(
+        "authMessage",
+        "Creating driver account…"
+      );
+
+
+      try {
+
+        const email =
+          authEmailFromPhone(phone);
+
+
+        // Create Firebase Authentication account
+
+        const userCredential =
+          await createUserWithEmailAndPassword(
+
+            auth,
+
+            email,
+
+            password
+
+          );
+
+
+        const user =
+          userCredential.user;
+
+
+        // Save driver profile in Realtime Database
+
+        await set(
+
+          ref(db, `drivers/${user.uid}`),
+
+          {
+
+            name: name,
+
+            phone: phone,
+
+            assignedBus: assignedBus,
+
+            role: "driver",
+
+            createdAt: Date.now()
+
+          }
+
+        );
+
+
+        currentDriver =
+          user;
+
+
+        currentDriverProfile = {
+
+          name: name,
+
+          phone: phone,
+
+          assignedBus: assignedBus,
+
+          role: "driver",
+
+          createdAt: Date.now()
+
+        };
+
+
+        setMessage(
+          "authMessage",
+          "Driver account created successfully.",
+          "success"
+        );
+
+
+        setDriverDashboard(
+          currentDriverProfile
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "Registration error:",
+          error
+        );
+
+
+        setMessage(
+          "authMessage",
+          friendlyAuthError(error),
+          "error"
+        );
+
+      }
+
+    }
+  );
+
+}
+
+
+// ======================================================
+// FIREBASE AUTH STATE
+// ======================================================
+
+onAuthStateChanged(
+
+  auth,
+
+  async (user) => {
+
+    if (!user) {
+
+      currentDriver = null;
+
+      currentDriverProfile = null;
+
+      return;
+
+    }
+
+
+    try {
+
+      await loadDriverProfile(user);
+
+    } catch (error) {
+
+      console.error(
+        "Authentication state error:",
+        error
+      );
+
+    }
+
+  }
+
+);
+
+
+// ======================================================
+// FIREBASE AUTH ERROR MESSAGES
+// ======================================================
+
+function friendlyAuthError(error) {
+
+  switch (error.code) {
+
+    case "auth/invalid-credential":
+
+      return "Invalid phone number or password.";
+
+    case "auth/invalid-login-credentials":
+
+      return "Invalid phone number or password.";
+
+    case "auth/email-already-in-use":
+
+      return "An account already exists for this phone number.";
+
+    case "auth/weak-password":
+
+      return "Password is too weak. Use at least 6 characters.";
+
+    case "auth/invalid-email":
+
+      return "Invalid phone number.";
+
+    case "auth/user-not-found":
+
+      return "Driver account was not found.";
+
+    case "auth/wrong-password":
+
+      return "Incorrect password.";
+
+    case "auth/too-many-requests":
+
+      return "Too many attempts. Please try again later.";
+
+    case "auth/network-request-failed":
+
+      return "Network error. Check your internet connection.";
+
+    default:
+
+      return error.message ||
+        "Something went wrong. Please try again.";
+
+  }
+
+}
+
+
+// ======================================================
+// INITIALIZE BUS SELECTS
+// ======================================================
+
+fillBusSelects();
+
+
+console.log(
+  "AMS Bus Finder Firebase initialized successfully."
+);
