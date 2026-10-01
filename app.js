@@ -121,6 +121,248 @@ let studentListener = null;
 let map = null;
 
 let busMarker = null;
+// ======================================================
+// DRIVER GPS TRACKING
+// ======================================================
+
+function startDriverTracking() {
+
+  // Make sure a driver is logged in
+  if (!currentDriver) {
+
+    setMessage(
+      "driverMessage",
+      "Please login as a driver first.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  // Get assigned bus
+  const busNumber =
+    currentDriverProfile?.assignedBus;
+
+
+  if (!busNumber) {
+
+    setMessage(
+      "driverMessage",
+      "No bus is assigned to this driver.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  // Check browser GPS support
+  if (!navigator.geolocation) {
+
+    setMessage(
+      "driverMessage",
+      "GPS is not supported by this browser.",
+      "error"
+    );
+
+    return;
+
+  }
+
+
+  // Stop an existing GPS watcher
+  if (watchId !== null) {
+
+    navigator.geolocation.clearWatch(
+      watchId
+    );
+
+  }
+
+
+  currentTrackingBus =
+    busNumber;
+
+
+  setMessage(
+    "driverMessage",
+    `Starting GPS tracking for ${busNumber}…`
+  );
+
+
+  // Start watching driver's location
+  watchId =
+    navigator.geolocation.watchPosition(
+
+      async (position) => {
+
+        const latitude =
+          position.coords.latitude;
+
+        const longitude =
+          position.coords.longitude;
+
+        const accuracy =
+          position.coords.accuracy;
+
+
+        console.log(
+          "Driver GPS:",
+          latitude,
+          longitude,
+          "Accuracy:",
+          accuracy
+        );
+
+
+        try {
+
+          // Store GPS data inside the bus
+          const locationRef =
+            ref(
+              db,
+              `buses/${busNumber}/location`
+            );
+
+
+          await set(
+
+            locationRef,
+
+            {
+              latitude: latitude,
+              longitude: longitude,
+              accuracy: accuracy,
+              updatedAt: Date.now(),
+              driverUid: currentDriver.uid
+            }
+
+          );
+
+
+          console.log(
+            `Location uploaded for ${busNumber}`
+          );
+
+
+          setMessage(
+            "driverMessage",
+            `GPS tracking active — ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+            "success"
+          );
+
+
+        } catch (error) {
+
+          console.error(
+            "GPS Firebase error:",
+            error
+          );
+
+
+          setMessage(
+            "driverMessage",
+            "GPS received, but Firebase update failed.",
+            "error"
+          );
+
+        }
+
+      },
+
+      (error) => {
+
+        console.error(
+          "GPS error:",
+          error
+        );
+
+
+        let message =
+          "Unable to get your location.";
+
+
+        switch (error.code) {
+
+          case error.PERMISSION_DENIED:
+
+            message =
+              "Location permission was denied. Please allow GPS access.";
+
+            break;
+
+
+          case error.POSITION_UNAVAILABLE:
+
+            message =
+              "Your current location is unavailable.";
+
+            break;
+
+
+          case error.TIMEOUT:
+
+            message =
+              "GPS request timed out. Trying again…";
+
+            break;
+
+        }
+
+
+        setMessage(
+          "driverMessage",
+          message,
+          "error"
+        );
+
+      },
+
+      {
+        enableHighAccuracy: true,
+        maximumAge: 5000,
+        timeout: 15000
+      }
+
+    );
+
+}
+
+
+// ======================================================
+// STOP DRIVER GPS TRACKING
+// ======================================================
+
+function stopDriverTracking() {
+
+  if (watchId !== null) {
+
+    navigator.geolocation.clearWatch(
+      watchId
+    );
+
+    watchId = null;
+
+  }
+
+
+  currentTrackingBus = null;
+
+
+  setMessage(
+    "driverMessage",
+    "GPS tracking stopped."
+  );
+
+
+  console.log(
+    "Driver GPS tracking stopped."
+  );
+
+}
 
 
 // ======================================================
