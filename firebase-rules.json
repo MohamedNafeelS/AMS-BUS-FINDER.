@@ -1,0 +1,33 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+
+    "buses": {
+      ".read": true,
+      "$busNumber": {
+        ".write": "auth != null && root.child('drivers').child(auth.uid).child('assignedBus').val() == $busNumber",
+        ".validate": "newData.hasChildren(['driverName', 'driverPhone', 'sharing', 'lastUpdated', 'route'])",
+        "driverName": { ".validate": "newData.isString()" },
+        "driverPhone": { ".validate": "newData.isString()" },
+        "latitude": { ".validate": "!newData.exists() || newData.isNumber()" },
+        "longitude": { ".validate": "!newData.exists() || newData.isNumber()" },
+        "accuracy": { ".validate": "!newData.exists() || newData.isNumber()" },
+        "sharing": { ".validate": "newData.isBoolean()" },
+        "lastUpdated": { ".validate": "newData.isNumber()" },
+        "route": { ".validate": "newData.isString()" }
+      }
+    },
+
+    "drivers": {
+      "$uid": {
+        ".read": "auth != null && auth.uid == $uid",
+        ".write": "auth != null && auth.uid == $uid",
+        ".validate": "newData.hasChildren(['name', 'phone', 'assignedBus'])",
+        "name": { ".validate": "newData.isString() && newData.val().length > 0" },
+        "phone": { ".validate": "newData.isString() && newData.val().length >= 10" },
+        "assignedBus": { ".validate": "newData.isString() && newData.val().length > 0" }
+      }
+    }
+  }
+}
