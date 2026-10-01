@@ -415,7 +415,7 @@ $("registerForm").addEventListener(
 
     const phone =
       normalizePhone(
-        $("registerPhone").value
+        $("registerPhone").value)
 import {
   getFirestore,
   collection,
