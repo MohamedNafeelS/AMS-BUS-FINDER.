@@ -125,51 +125,135 @@ let busMarker = null;
 // DRIVER GPS TRACKING
 // ======================================================
 
-function startDriverTracking() {
+// ===============================
+// DRIVER GPS TRACKING
+// ===============================
 
-  // Make sure a driver is logged in
-  if (!currentDriver) {
-
-    setMessage(
-      "driverMessage",
-      "Please login as a driver first.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  // Get assigned bus
-  const busNumber =
-    currentDriverProfile?.assignedBus;
-
-
-  if (!busNumber) {
-
-    setMessage(
-      "driverMessage",
-      "No bus is assigned to this driver.",
-      "error"
-    );
-
-    return;
-
-  }
-
-
-  // Check browser GPS support
+function startGPS() {
   if (!navigator.geolocation) {
-
-    setMessage(
-      "driverMessage",
-      "GPS is not supported by this browser.",
-      "error"
-    );
-
+    setMessage("driverMessage", "GPS is not supported by this browser.", "error");
     return;
+  }
 
+  const busSelect =
+    document.getElementById("driverBus") ||
+    document.getElementById("driverBusSelect");
+
+  if (!busSelect || !busSelect.value) {
+    setMessage("driverMessage", "Please select a bus first.", "error");
+    return;
+  }
+
+  let busKey = busSelect.value.trim().toLowerCase();
+
+  // Convert "Bus 1" → "bus1"
+  busKey = busKey.replace(/\s+/g, "");
+
+  // Convert "1" → "bus1"
+  if (/^\d+$/.test(busKey)) {
+    busKey = `bus${busKey}`;
+  }
+
+  console.log("Tracking Firebase bus:", busKey);
+
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+  }
+
+  watchId = navigator.geolocation.watchPosition(
+    async (position) => {
+
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+      const accuracy = position.coords.accuracy;
+
+      console.log("GPS:", latitude, longitude);
+
+      try {
+
+        const locationRef = ref(
+          db,
+          `buses/${busKey}/location`
+        );
+
+        await set(locationRef, {
+          latitude: latitude,
+          longitude: longitude,
+          accuracy: accuracy,
+          updatedAt: Date.now(),
+          driverUid: currentDriver ? currentDriver.uid : null
+        });
+
+        console.log("GPS location saved to Firebase.");
+
+        setMessage(
+          "driverMessage",
+          `Location sharing is ON — ${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+          "success"
+        );
+
+      } catch (error) {
+
+        console.error("Firebase GPS error:", error);
+
+        setMessage(
+          "driverMessage",
+          "GPS received, but Firebase update failed.",
+          "error"
+        );
+      }
+    },
+
+    (error) => {
+
+      console.error("GPS error:", error);
+
+      setMessage(
+        "driverMessage",
+        "Unable to get GPS location. Please allow location access.",
+        "error"
+      );
+    },
+
+    {
+      enableHighAccuracy: true,
+      maximumAge: 5000,
+      timeout: 15000
+    }
+  );
+}
+
+
+// ===============================
+// STOP GPS
+// ===============================
+
+function stopGPS() {
+
+  if (watchId !== null) {
+
+    navigator.geolocation.clearWatch(watchId);
+
+    watchId = null;
+  }
+
+  setMessage(
+    "driverMessage",
+    "Location sharing is OFF."
+  );
+
+  console.log("GPS tracking stopped.");
+}
+const startGPSButton = document.getElementById("startTrackingBtn");
+const stopGPSButton = document.getElementById("stopTrackingBtn");
+
+if (startGPSButton) {
+  startGPSButton.addEventListener("click", startGPS);
+}
+
+if (stopGPSButton) {
+  stopGPSButton.addEventListener("click", stopGPS);
+}
   }
 
 
