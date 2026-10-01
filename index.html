@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#0b63ce">
+<title>AMS Bus Finder — Driver & Student</title>
+<style>
+:root{--blue:#0b63ce;--blue2:#084b9c;--bg:#f5f8fc;--text:#10233f;--muted:#6b7b91;--card:#fff;--line:#dfe7f1;--green:#16a05d;--red:#d83a3a;--shadow:0 16px 40px rgba(16,35,63,.10)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;background:var(--bg);color:var(--text)}
+button,input,select{font:inherit}button{cursor:pointer}.hidden{display:none!important}
+.top{background:linear-gradient(135deg,#084b9c,#0b63ce);color:white;padding:18px 20px;position:sticky;top:0;z-index:5;box-shadow:0 5px 18px #001b4430}
+.topin{max-width:1050px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{display:flex;align-items:center;gap:10px}.logo{width:44px;height:44px;border-radius:13px;background:white;color:var(--blue);display:grid;place-items:center;font-weight:900}.brand strong{display:block;font-size:18px}.brand small{opacity:.82}
+main{max-width:1050px;margin:auto;padding:24px 16px 60px}
+.hero{padding:18px 4px 12px}.eyebrow{font-size:12px;letter-spacing:1.7px;font-weight:800;color:var(--blue);margin:0 0 7px}.hero h1{font-size:clamp(28px,6vw,44px);margin:0 0 8px}.hero p{color:var(--muted);margin:0;line-height:1.6}
+.entry-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:18px}
+.entry{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px;box-shadow:var(--shadow);transition:.2s}.entry:hover{transform:translateY(-2px)}.entry .icon{font-size:40px}.entry h2{margin:13px 0 6px}.entry p{color:var(--muted);line-height:1.55}.entry button,.primary{width:100%;border:0;background:var(--blue);color:white;padding:13px 16px;border-radius:13px;font-weight:800}.entry.student button{background:#173d68}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--shadow);margin-top:18px}
+.form{max-width:560px;margin:25px auto}.form h2{margin-top:0}.field{margin:13px 0}.field label{display:block;font-size:13px;font-weight:800;margin-bottom:7px}.field input,.field select{width:100%;padding:13px;border:1px solid #ccd7e5;border-radius:12px;outline:none;background:#fff}.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #0b63ce15}
+.row{display:flex;gap:10px}.row>*{flex:1}.secondary{border:1px solid #cbd7e6;background:white;color:var(--text);padding:12px 15px;border-radius:12px;font-weight:800}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:#e8eff8;border-radius:15px;padding:4px;margin:8px 0 20px}.tabs button{border:0;background:transparent;padding:12px;border-radius:11px;font-weight:800;color:#59708c}.tabs button.active{background:white;color:var(--blue);box-shadow:0 2px 8px #183b5e12}
+.dashboard-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.logout{border:1px solid #ccd7e5;background:white;border-radius:11px;padding:9px 12px;font-weight:800}
+.status{padding:12px 14px;border-radius:14px;background:#edf8f2;border:1px solid #bce5cf;color:#167346;font-weight:700;margin:14px 0}.status.off{background:#fff3f3;border-color:#f0c8c8;color:#a72b2b}
+.big-toggle{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:18px;background:#f7faff;border:1px solid var(--line);border-radius:18px}.toggle{width:68px;height:38px;border:0;border-radius:30px;background:#9aaabd;padding:4px;position:relative}.toggle i{display:block;width:30px;height:30px;background:white;border-radius:50%;transition:.2s}.toggle.on{background:var(--green)}.toggle.on i{transform:translateX(30px)}
+.info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:15px}.stat{border:1px solid var(--line);border-radius:15px;padding:15px}.stat small{display:block;color:var(--muted);font-weight:700}.stat strong{display:block;margin-top:5px;font-size:18px}
+.bus-results{display:grid;gap:12px;margin-top:15px}.bus{border:1px solid var(--line);border-radius:17px;padding:16px;background:white}.bus-top{display:flex;justify-content:space-between;gap:10px}.live{color:#13804b;font-size:12px;font-weight:900}.route{color:var(--muted);font-size:13px;margin-top:7px;line-height:1.5}.bus button{margin-top:12px;width:100%;padding:11px;border:0;border-radius:11px;background:#edf4ff;color:var(--blue);font-weight:800}
+.map{height:270px;border-radius:18px;background:linear-gradient(135deg,#e9f2e8,#dfeaf5);position:relative;overflow:hidden;margin-top:16px;border:1px solid var(--line)}.map:before,.map:after{content:"";position:absolute;background:white;height:12px;width:130%;left:-15%;top:50%;transform:rotate(-18deg);box-shadow:0 35px 0 white}.map:after{transform:rotate(62deg);opacity:.8}.map-dot{position:absolute;width:24px;height:24px;border-radius:50%;background:#0b63ce;border:5px solid white;box-shadow:0 5px 14px #0b63ce55;z-index:2;transform:translate(-50%,-50%)}.map-label{position:absolute;z-index:2;background:#ffffffdd;padding:5px 8px;border-radius:8px;font-size:11px;font-weight:800}.notice{margin-top:14px;padding:13px 15px;border-radius:14px;background:#fff8df;border:1px solid #f1df9a;color:#725800}
+.back{border:0;background:transparent;color:var(--blue);font-weight:800;padding:0;margin-bottom:15px}
+small.muted{color:var(--muted)}.error{color:#b52f2f;font-size:13px;min-height:18px}.ok{color:#167346;font-size:13px;min-height:18px}
+.route-list{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.route-item{padding:14px;border:1px solid var(--line);border-radius:15px}.route-item strong{color:var(--blue)}.route-item p{margin:7px 0 0;color:var(--muted);font-size:13px;line-height:1.5}.share-link-box{display:flex;gap:8px;margin:12px 0 14px}.share-link-box input{flex:1;min-width:0;padding:12px;border:1px solid #dbe4f0;border-radius:12px;background:#f8fbff;font-size:13px}.copy-link-btn{border:0;border-radius:12px;padding:0 16px;background:#0b63f6;color:white;font-weight:700}.share-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:14px}.share-btn{border:0;border-radius:14px;padding:14px 12px;font-weight:900;font-size:15px}.share-btn.whatsapp{background:#e8f8ef;color:#12804b}.share-btn.instagram{background:#f5eafa;color:#8a2ca8}.share-btn.normal{background:#edf4ff;color:var(--blue)}.share-btn.copy{background:#f0f2f5;color:#394b63}@media(max-width:500px){.share-link-box{display:flex;gap:8px;margin:12px 0 14px}.share-link-box input{flex:1;min-width:0;padding:12px;border:1px solid #dbe4f0;border-radius:12px;background:#f8fbff;font-size:13px}.copy-link-btn{border:0;border-radius:12px;padding:0 16px;background:#0b63f6;color:white;font-weight:700}.share-grid{grid-template-columns:1fr}}
+footer{text-align:center;color:#8492a6;padding:30px 10px;font-size:12px}
+@media(max-width:700px){.entry-grid,.info-grid,.route-list{grid-template-columns:1fr}.row{flex-direction:column}.entry{padding:22px}.dashboard-head{align-items:flex-start}}
+</style>
+</head>
+<body>
+<header class="top">
+ <div class="topin"><div class="brand"><div class="logo">AMS</div><div><strong>AMS Bus Finder</strong><small>College Transport</small></div></div><small>Live transport demo</small></div>
+</header>
+
+<main>
+<section id="home">
+ <div class="hero"><p class="eyebrow">AALIM MUHAMMED SALEGH COLLEGE</p><h1>Track your college bus</h1><p>Choose how you want to enter. Drivers share their live location; students and families search for a bus and view its latest shared status.</p></div>
+ <div class="row" style="margin:18px 0 4px">
+  <button class="secondary" onclick="openShareMenu()">↗ Share AMS Bus Finder</button>
+</div>
+<div id="shareMenu" class="card hidden" style="margin-top:10px">
+  <div class="dashboard-head"><div><p class="eyebrow">SHARE</p><h3 style="margin:0">Share AMS Bus Finder</h3></div><button class="back" onclick="closeShareMenu()">✕ Close</button></div>
+  <p class="muted" style="line-height:1.5">Share this website with students, parents, or drivers.</p>
+  <div class="share-link-box">
+    <input id="shareLink" type="text" readonly value="">
+    <button class="copy-link-btn" onclick="copyWebsiteLink()">Copy</button>
+  </div>
+  <div class="share-grid">
+    <button class="share-btn whatsapp" onclick="shareWhatsApp()">🟢 WhatsApp</button>
+    <button class="share-btn instagram" onclick="shareInstagram()">📷 Instagram</button>
+    <button class="share-btn normal" onclick="shareNative()">↗ More apps</button>
+  </div>
+  <p id="shareMsg" class="ok"></p>
+</div>
+ <div class="entry-grid">
+  <article class="entry"><div class="icon">👨‍✈️</div><h2>Driver</h2><p>Create a driver account, select your bus, then switch on location sharing when your trip starts.</p><button onclick="show('driverAuth')">Open Driver</button></article>
+  <article class="entry student"><div class="icon">🎓</div><h2>Student / Family</h2><p>No student account is required. Search by bus number to see the driver's current shared status.</p><button onclick="show('student')">Open Student Search</button></article>
+ </div>
+ <div class="card"><div class="dashboard-head"><div><p class="eyebrow">ROUTES</p><h3 style="margin:0">College bus routes</h3></div><button class="secondary" onclick="show('routes')">View routes</button></div><p class="muted">The supplied 2026–27 route chart contains Routes 1–8. The current brief says 7 buses, so this prototype keeps the route-chart's 8 routes rather than silently removing one.</p></div>
+</section>
+
+<section id="driverAuth" class="hidden">
+ <button class="back" onclick="show('home')">← Back</button>
+ <div class="card form">
+  <div class="tabs"><button id="loginTab" class="active" onclick="driverMode('login')">Driver Login</button><button id="createTab" onclick="driverMode('create')">Create Account</button></div>
+  <form id="driverForm">
+   <div class="field"><label>Driver username</label><input id="du" required placeholder="e.g. jaya_kumar"></div>
+   <div class="field"><label>Password</label><input id="dp" type="password" required placeholder="Create a password"></div>
+   <div id="driverCreateExtra" class="hidden"><div class="field"><label>Confirm password</label><input id="dc" type="password" placeholder="Confirm password"></div></div>
+   <button class="primary" id="driverSubmit">Sign In</button><p id="driverMsg" class="error"></p>
+  </form>
+  <small class="muted">Demo note: this browser-only prototype stores driver credentials locally. A real multi-phone system needs a secure server/database.</small>
+ </div>
+</section>
+
+<section id="driverPanel" class="hidden">
+ <div class="dashboard-head"><div><p class="eyebrow">DRIVER CONTROL</p><h2 style="margin:0">Location Sharing</h2></div><div class="row" style="justify-content:flex-end"><button class="secondary" onclick="openShareMenu()">↗ Share</button><button class="logout" onclick="driverLogout()">Log out</button></div></div>
+ <div class="card">
+  <div class="field"><label>Which bus are you driving?</label><select id="driverBus"></select></div>
+  <div class="big-toggle"><div><strong>Share my live location</strong><br><small class="muted">Turn this ON only when the bus is running.</small></div><button id="shareToggle" class="toggle" onclick="toggleShare()" aria-label="Share location"><i></i></button></div>
+  <div id="driverStatus" class="status off">Location sharing is OFF.</div>
+  <div class="info-grid"><div class="stat"><small>Driver</small><strong id="driverName">—</strong></div><div class="stat"><small>Bus</small><strong id="driverBusShow">—</strong></div><div class="stat"><small>Last update</small><strong id="lastUpdate">—</strong></div></div>
+  <div class="map" id="driverMap"><div class="map-label" style="left:12px;top:12px">Driver GPS preview</div><div id="driverDot" class="map-dot hidden" style="left:50%;top:50%"></div></div>
+  <div class="notice">Important: browser GPS permission must be allowed. The sharing screen must stay open for continuous updates. For students on another phone to receive the location, connect this page to a realtime backend such as Firebase/Supabase.</div>
+  <div class="card" style="box-shadow:none;margin-top:14px;border-color:#f0c8c8">
+    <strong>Account</strong>
+    <p style="color:var(--muted);font-size:13px;line-height:1.5">Delete this driver account from this prototype. The saved username/password and this driver's active shared location will be removed from this browser.</p>
+    <button class="secondary" style="width:100%;border-color:#e5aaaa;color:#b52f2f" onclick="deleteDriverAccount()">Delete Driver Account</button>
+  </div>
+ </div>
+</section>
+
+<section id="student" class="hidden">
+ <button class="back" onclick="show('home')">← Back</button>
+ <div class="hero"><p class="eyebrow">STUDENT / FAMILY</p><h2 style="margin:0 0 8px">Find a bus</h2><p>Enter a bus number. No student login is required.</p></div>
+ <div class="card">
+  <div class="field"><label for="studentBus">Bus number</label><input id="studentBus" inputmode="numeric" placeholder="Enter bus number / route number"></div>
+  <button class="primary" onclick="searchBus()">Search Bus</button>
+  <p id="studentMsg" class="error"></p>
+ </div>
+ <div id="studentResult"></div>
+</section>
+
+<section id="routes" class="hidden">
+ <button class="back" onclick="show('home')">← Back</button>
+ <div class="hero"><p class="eyebrow">2026–27 ROUTE CHART</p><h2 style="margin:0">Bus routes</h2><p>Route names and driver details below are transcribed from the supplied route-chart images.</p></div>
+ <div id="routeList" class="route-list"></div>
+</section>
+</main>
+<footer>AMS Bus Finder · Driver GPS + Student Search prototype</footer>
+
+<script>
+const routes=[
+{n:1,name:"Tambaram to Campus",driver:"Jaya Kumar",phone:"9840943417",stops:["Tambaram","Chrompet","Pallavaram","Asarakhana","St. Thomas Mount","Ekkattuthangal","Ashok Pillar","Senthil Tower","Vadapalani","CMBT","Nerkundram","Maduvaroyal","Ambattur","Campus"]},
+{n:2,name:"Velachery to Campus",driver:"Rama Moorthy",phone:"984001063",stops:["Velachery Railway Station","Vijaya Nagar Bus Stand","Velachery Krishna Sweet","Kanniagapuram","Saidapet Court","Guindy","Ekkattuthangal","Ashok Pillar","KKNagar RTTO","KK Nagar Sivan Park","Virugambakkam","Valasaravakkam","Porur","Ramachandra Hospital","Aiyappanthangal","Kattupakkam","Karayan Chavadi","Savidha Dental College","SA College","Paruthipattu Church","Avadi","Campus"]},
+{n:3,name:"Foreshore Estate to Campus",driver:"Guna Sekar",phone:"9840692626",stops:["Pattinapakkam","Royapettah Police Station","LIC","Gemini Bridge","Valluvar Kottam","Loyola College","Nelson Manickam Road","Shanthi Colony","Thirumangalam","Waves","Padi Saravana","Mannurpet","Ambattur","Ambattur Dunlop","Saraswathi Nagar","Thirumullaivoyal","Avadi","Campus"]},
+{n:4,name:"Ice House to Campus",driver:"SRN Jivasan",phone:"9840986527",stops:["Royapettah Post Office","Mirshaip Market","Ice House","Rathnacafe","Adam Market","Chindadripet","Pudupet","Pachaiyappa College","Aminjikarai","Sky Walk","Vaishnav College","Mogappair West","Mogappair East","Ambattur Telephone Exchange","Thirumullaivoyal","Avadi","Hindu College","Campus"]},
+{n:5,name:"Kalmadam to Campus",driver:"Bharani Dharan",phone:"9840626971",stops:["Kasimedu","Royapuram Signal","Thambu Chetty Street","FX School","Excellent Hotel","Minerva Theatre","Central Railway Station","Periamet","Vepery Bridge","Dowton","Purasaiwakkam","Sayani","ESI","Ayanavaram","Noor Hotel","ICF","Villivakkam","TN Thirumani","Padi","Britannia","Ambattur","Campus"]},
+{n:6,name:"Ennore to Campus",driver:"Raji Ravi",phone:"9952029880",stops:["Ennore","Lift Gate","Tiruvotriyur ITC","Ajax","Theradi","Raja Kadai","Thangal","Cross Road","Tondiarpet","Nirmala Store","Sharma Theatre","Mint","Pulianthope","Pattalam","Jamaliya","Perambur","Venus","Peravallur","Kolathur","Retter","Vina Yagapuram","Kallikuppam","Pudur","Oragadam","Campus"]},
+{n:7,name:"Kannadasan Nagar to Campus",driver:"Ramesh B",phone:"9840968528",stops:["Kannadasan Nagar","MR Nagar","Moolakadai","Postbox","Manali","Mathur","Manjambakkam","Madhavaram Roundana","Puzhalcamp","Kavan Karai","Vada Karai","Redhills","Redhills Aala Maram","Kannada Palaiyam","Campus"]},
+{n:8,name:"Minjur to Campus",driver:"Devaraj",phone:"9176907220",stops:["Minjur Sathiyatore","Minjur Railway Station","Minjur Bus Stand","Medurpalayam","Thadaperumbakkam","Ponniri","Pazhaverkadd Cross Road","Muslim Nagar","AndalKuppam","Jana Chatiram Cross Road","Thachur Crossroad","Karamadai","Sholavaram","Padianallur","Redhills Revathi Store","Alamaram","Gandhinagar","Campus"]}
+];
+
+let mode="login",watchId=null,sharing=false,currentUser=localStorage.getItem("ams_driver_user")||"";
+const $=id=>document.getElementById(id);
+
+function show(id){
+ ["home","driverAuth","driverPanel","student","routes"].forEach(x=>$(x).classList.add("hidden"));
+ $(id).classList.remove("hidden");
+ window.scrollTo({top:0,behavior:"smooth"});
+ if(id==="driverPanel") initDriver();
+ if(id==="routes") renderRoutes();
+}
+function driverMode(m){
+ mode=m;$("loginTab").classList.toggle("active",m==="login");$("createTab").classList.toggle("active",m==="create");
+ $("driverCreateExtra").classList.toggle("hidden",m!=="create");$("driverSubmit").textContent=m==="create"?"Create Account":"Sign In";$("driverMsg").textContent="";
+}
+$("driverForm").addEventListener("submit",e=>{
+ e.preventDefault();let u=$("du").value.trim(),p=$("dp").value;
+ if(mode==="create"){
+  if(p!==$("dc").value){$("driverMsg").textContent="Passwords do not match.";return}
+  if(p.length<4){$("driverMsg").textContent="Use at least 4 characters.";return}
+  localStorage.setItem("ams_driver_"+u,JSON.stringify({user:u,password:p}));localStorage.setItem("ams_driver_user",u);currentUser=u;show("driverPanel");
+ }else{
+  let raw=localStorage.getItem("ams_driver_"+u);
+  if(!raw||JSON.parse(raw).password!==p){$("driverMsg").textContent="Incorrect username or password.";return}
+  localStorage.setItem("ams_driver_user",u);currentUser=u;show("driverPanel");
+ }
+});
+function driverLogout(){stopShare();localStorage.removeItem("ams_driver_user");currentUser="";show("home")}
+function initDriver(){
+ $("driverName").textContent=currentUser||"Driver";
+ $("driverBus").innerHTML=routes.map(r=>`<option value="${r.n}">Bus ${r.n} — ${r.name}</option>`).join("");
+ $("driverBusShow").textContent="Bus "+$("driverBus").value;
+ $("driverBus").onchange=()=>{$("driverBusShow").textContent="Bus "+$("driverBus").value;if(sharing) stopShare()};
+}
+function toggleShare(){sharing?stopShare():startShare()}
+function startShare(){
+ if(!navigator.geolocation){$("driverStatus").textContent="This browser does not support GPS location.";return}
+ sharing=true;$("shareToggle").classList.add("on");$("driverStatus").className="status";$("driverStatus").textContent="Location sharing is ON. Keep this page open.";
+ watchId=navigator.geolocation.watchPosition(pos=>{
+  let lat=pos.coords.latitude,lon=pos.coords.longitude;
+  $("lastUpdate").textContent=new Date().toLocaleTimeString();
+  let x=((lon%0.02)/0.02*70+15),y=((lat%0.02)/0.02*70+15);$("driverDot").classList.remove("hidden");$("driverDot").style.left=Math.max(10,Math.min(90,x))+"%";$("driverDot").style.top=Math.max(15,Math.min(85,y))+"%";
+  let data={bus:$("driverBus").value,driver:currentUser,lat,lon,accuracy:Math.round(pos.coords.accuracy),updatedAt:Date.now(),sharing:true};
+  localStorage.setItem("ams_live_bus_"+data.bus,JSON.stringify(data));
+ },err=>{$("driverStatus").className="status off";$("driverStatus").textContent="GPS permission/location error: "+err.message});
+}
+function stopShare(){
+ sharing=false;if(watchId!==null){navigator.geolocation.clearWatch(watchId);watchId=null}
+ $("shareToggle")?.classList.remove("on");if($("driverStatus")){$("driverStatus").className="status off";$("driverStatus").textContent="Location sharing is OFF."}
+}
+function searchBus(){
+ let n=$("studentBus").value.trim().replace(/\D/g,"");let r=routes.find(x=>String(x.n)===n);
+ if(!r){$("studentMsg").textContent="Enter a route number from 1 to 8.";return}
+ $("studentMsg").textContent="";
+ let live=JSON.parse(localStorage.getItem("ams_live_bus_"+n)||"null");
+ let location=live?`GPS active · ±${live.accuracy} m`:"Driver has not shared live GPS yet";
+ $("studentResult").innerHTML=`<div class="card"><div class="dashboard-head"><div><p class="eyebrow">BUS ${r.n}</p><h2 style="margin:0">${r.name}</h2></div><strong class="${live?'live':''}">${live?'● LIVE':'○ OFFLINE'}</strong></div><div class="info-grid"><div class="stat"><small>Driver</small><strong>${live?live.driver:r.driver}</strong></div><div class="stat"><small>Current status</small><strong>${live?'Location shared':'Waiting for driver'}</strong></div><div class="stat"><small>Updated</small><strong>${live?new Date(live.updatedAt).toLocaleTimeString():'—'}</strong></div></div><div class="map"><div class="map-label" style="left:12px;top:12px">${location}</div>${live?'<div class="map-dot" style="left:50%;top:50%"></div>':''}<div class="map-label" style="right:12px;bottom:12px">Route ${r.n} → Campus</div></div><div class="notice"><strong>Route:</strong> ${r.stops.join(" → ")}</div></div>`;
+}
+function openShareMenu(){
+ const menu=$("shareMenu");
+ if(menu){menu.classList.remove("hidden");updateShareLink();menu.scrollIntoView({behavior:"smooth",block:"center"});}
+}
+function closeShareMenu(){
+ const menu=$("shareMenu");
+ if(menu)menu.classList.add("hidden");
+}
+function getShareLink(){
+  return window.location.href;
+}
+function updateShareLink(){
+  const box=$("shareLink");
+  if(box) box.value=getShareLink();
+}
+function shareText(){
+  return "Check out AMS Bus Finder — track college buses here: "+getShareLink();
+}
+function shareWhatsApp(){
+  const url="https://wa.me/?text="+encodeURIComponent(shareText());
+  window.open(url,"_blank","noopener");
+}
+async function copyWebsiteLink(){
+  const link=getShareLink();
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(link);
+    }else{
+      const ta=document.createElement("textarea");
+      ta.value=link;
+      ta.style.position="fixed";
+      ta.style.opacity="0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand("copy");
+      ta.remove();
+    }
+    if($("shareMsg")) $("shareMsg").textContent="✅ Link copied successfully. Paste it in WhatsApp, Instagram, or any chat.";
+  }catch(e){
+    if($("shareMsg")) $("shareMsg").textContent="Please long-press the link above and choose Copy.";
+  }
+}
+function shareInstagram(){
+  copyWebsiteLink();
+  setTimeout(()=>{
+    window.open("https://www.instagram.com/","_blank","noopener");
+  },300);
+}
+async function shareNative(){
+  const shareData={title:"AMS Bus Finder",text:"Use AMS Bus Finder to track college buses.",url:getShareLink()};
+  try{
+    if(navigator.share){
+      await navigator.share(shareData);
+    }else{
+      await copyWebsiteLink();
+    }
+  }catch(e){
+    if(e.name!=="AbortError") await copyWebsiteLink();
+  }
+}
+function shareWebsite(){openShareMenu();}
+function deleteDriverAccount(){
+ if(!currentUser){return}
+ const ok=confirm("Delete this driver account? This will also remove its saved login and active bus-location data from this browser.");
+ if(!ok)return;
+ stopShare();
+ const keysToRemove=[];
+ for(let i=0;i<localStorage.length;i++){
+  const k=localStorage.key(i);
+  if(k && k.startsWith("ams_live_bus_")){
+   try{
+    const d=JSON.parse(localStorage.getItem(k));
+    if(d && d.driver===currentUser) keysToRemove.push(k);
+   }catch(e){}
+  }
+ }
+ keysToRemove.forEach(k=>localStorage.removeItem(k));
+ localStorage.removeItem("ams_driver_"+currentUser);
+ localStorage.removeItem("ams_driver_user");
+ currentUser="";
+ alert("Driver account deleted.");
+ show("home");
+}
+function renderRoutes(){$("routeList").innerHTML=routes.map(r=>`<div class="route-item"><strong>Route ${r.n} — ${r.name}</strong><p>Driver: ${r.driver} · ${r.phone}</p><p>${r.stops.join(" → ")}</p></div>`).join("")}
+if(currentUser){show("driverPanel")}else{show("home")}
+</script>
+<script>document.addEventListener('DOMContentLoaded', updateShareLink);</script>
+</body>
+</html>
