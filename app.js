@@ -25,7 +25,6 @@ const FIREBASE_CONFIG = {
 const app = firebase.initializeApp(FIREBASE_CONFIG);
 const db = getDatabase(app);
 const busesRef = ref(db, "buses");
-
 get(busesRef)
   .then((snapshot) => {
     if (snapshot.exists()) {
