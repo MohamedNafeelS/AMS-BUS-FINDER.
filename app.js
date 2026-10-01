@@ -6,6 +6,11 @@
   After creating your Firebase project, replace the values
   inside FIREBASE_CONFIG with your Firebase Web App configuration.
 */
+import {
+  getDatabase,
+  ref,
+  get
+} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
 
 const FIREBASE_CONFIG = {
  apiKey: "AIzaSyDfMoUFnEcvuAXP9TGTjeXLgKUCtqTlWJY",
@@ -17,7 +22,21 @@ const FIREBASE_CONFIG = {
  measurementId: "G-93S728E8YB"
 };
 
-firebase.initializeApp(FIREBASE_CONFIG);
+const app = firebase.initializeApp(FIREBASE_CONFIG);
+const db = getDatabase(app):
+const busesRef = ref(db, "buses");
+
+get(busesRef)
+  .then((snapshot) => {
+    if (snapshot.exists()) {
+      console.log("BUS DATA:", snapshot.val());
+    } else {
+      console.log("No bus data found");
+    }
+  })
+  .catch((error) => {
+    console.error("Firebase Database Error:", error);
+  });
 
 const auth = firebase.auth();
 const db = firebase.database();
